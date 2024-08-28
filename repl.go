@@ -15,8 +15,24 @@ func startREPL() {
 		scanner.Scan()
 		text := strings.TrimSpace(scanner.Text())
 
-		if text == "exit" {
-			break
-		}
+		if cmd, exists := commands[text]; exists {
+			err := cmd.function()
+
+			if err != nil {
+				if(err.Error() == "exit") {
+
+					fmt.Println("Exiting Pokedex...")
+					break
+
+				} else {
+
+					fmt.Println("Caught Error: ", err)
+					
+				}
+			}
+			
+		} else {
+			fmt.Println("Command not found.")
+		} 
 	}
 }
