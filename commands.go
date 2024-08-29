@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-
-	"github.com/Parutix/Pokedex/internal/pokeapi"
 )
 
 var commands map[string]command
@@ -12,7 +10,7 @@ var commands map[string]command
 type command struct {
 	name        string
 	description string
-	function    func() error
+	function    func(*config) error
 }
 
 func initCommands() {
@@ -35,11 +33,11 @@ func initCommands() {
 	}
 }
 
-func exitPokedex() error {
+func exitPokedex(cfg *config) error {
 	return errors.New("exit")
 }
 
-func listCommands() error {
+func listCommands(cfg *config) error {
 	for _, cmd := range commands {
 
 		if cmd.name == "" || cmd.description == "" {
@@ -51,14 +49,15 @@ func listCommands() error {
 	return nil
 }
 
-func displayMap() error {
-	pokeAPIClient := pokeapi.NewClient()
-	resp, err := pokeAPIClient.GetLocationAreas()
+func displayMap(cfg *config) error {
+	resp, err := cfg.pokeapiClient.GetLocationAreas(cfg.nextLocationAreasURL)
 	if err != nil {
 		return fmt.Errorf("Error getting location areas: %w", err)
 	}
 	for _, locationArea := range resp.Results {
 		fmt.Println(locationArea.Name)
 	}
+	cfg.nextLocationAreasURL = resp.Next
+	cfg.previousLocationAreasURL = resp.Previous
 	return nil
 }

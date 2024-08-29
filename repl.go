@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func startREPL() {
+func startREPL(cfg *config) {
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("Welcome to the Pokedex!")
 	for {
@@ -16,7 +16,7 @@ func startREPL() {
 		text := strings.TrimSpace(scanner.Text())
 
 		if cmd, exists := commands[text]; exists {
-			err := cmd.function()
+			err := cmd.function(cfg)
 
 			if err != nil {
 				if(err.Error() == "exit") {
@@ -30,7 +30,6 @@ func startREPL() {
 					
 				}
 			}
-			
 		} else {
 			fmt.Println("Command not found.")
 		} 
