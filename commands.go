@@ -27,8 +27,13 @@ func initCommands() {
 		},
 		"map": {
 			name:				"map",
-			description: "Display a map of the region",
+			description: "Display a map of the region. If the user writes map again, it will display the next page of the map",
 			function:		displayMap,
+		},
+		"mapb": {
+			name:				"mapb",
+			description: "Display the previous page of the map, if there is no previous page, it will display the first page",
+			function:		displayMapb,
 		},
 	}
 }
@@ -51,6 +56,19 @@ func listCommands(cfg *config) error {
 
 func displayMap(cfg *config) error {
 	resp, err := cfg.pokeapiClient.GetLocationAreas(cfg.nextLocationAreasURL)
+	if err != nil {
+		return fmt.Errorf("Error getting location areas: %w", err)
+	}
+	for _, locationArea := range resp.Results {
+		fmt.Println(locationArea.Name)
+	}
+	cfg.nextLocationAreasURL = resp.Next
+	cfg.previousLocationAreasURL = resp.Previous
+	return nil
+}
+
+func displayMapb(cfg *config) error {
+	resp, err := cfg.pokeapiClient.GetLocationAreas(cfg.previousLocationAreasURL)
 	if err != nil {
 		return fmt.Errorf("Error getting location areas: %w", err)
 	}
