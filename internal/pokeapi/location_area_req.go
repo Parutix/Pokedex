@@ -56,3 +56,35 @@ func (c *Client) GetLocationAreas(pageURL *string) (LocationAreas, error) {
 	return locationAreas, nil
 
 }
+
+func (c *Client) GetLocationPokemon(locationName string) (Location, error) {
+	endpoint := "/location-area/" + locationName
+	fullURL := baseURL + endpoint
+
+	req, err := http.NewRequest("GET", fullURL, nil)
+	if err != nil {
+		return Location{}, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return Location{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode > 399 {
+		return Location{}, fmt.Errorf("Error: %d", resp.StatusCode)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return Location{}, fmt.Errorf("Error reading response body: %w", err)
+	}
+
+	location := Location{}
+	err = json.Unmarshal(data, &location)
+	if err != nil {
+		return Location{}, fmt.Errorf("Error unmarshaling response: %w", err)
+	}
+	return location, nil
+}
