@@ -14,6 +14,17 @@ func (c *Client) GetLocationAreas(pageURL *string) (LocationAreas, error) {
 		fullURL = *pageURL
 	}
 
+	dat, ok := c.cache.Get(fullURL)
+	if ok {
+		// Cache found
+		locationAreas := LocationAreas{}
+		err := json.Unmarshal(dat, &locationAreas)
+		if err != nil {
+			return LocationAreas{}, fmt.Errorf("Error unmarshaling response: %w", err)
+		}
+		return locationAreas, nil
+	} 
+
 	req, err := http.NewRequest("GET", fullURL, nil)
 	if err != nil {
 		return LocationAreas{}, err
@@ -40,6 +51,8 @@ func (c *Client) GetLocationAreas(pageURL *string) (LocationAreas, error) {
 		return LocationAreas{}, fmt.Errorf("Error unmarshaling response: %w", err)
 	}
 
+	c.cache.Add(fullURL, data)
+	
 	return locationAreas, nil
 
 }
