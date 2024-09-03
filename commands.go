@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 )
 
 var commands map[string]command
@@ -39,6 +40,11 @@ func initCommands() {
 			name:				"explore",
 			description: "Explore the region and find new Pokemon",
 			function:		exploreRegion,
+		},
+		"catch": {
+			name:				"catch",
+			description: "Catch a Pokemon",
+			function:		catchPokemon,
 		},
 	}
 }
@@ -99,5 +105,29 @@ func exploreRegion(cfg *config, args ...string) error {
 	for _, pokemonEncounter := range location.PokemonEncounters {
 		fmt.Println(pokemonEncounter.Pokemon.Name)
 	}
+	return nil
+}
+
+func catchPokemon(cfg *config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("No Pokemon provided")
+	}
+	pokemonName := args[0]
+	fmt.Println("Catching " + pokemonName + "...")
+	pokemon, err := cfg.pokeapiClient.GetPokemon(pokemonName)
+	if err != nil {
+		return fmt.Errorf("Error getting pokemon: %w", err)
+	}
+
+	const threshold = 50
+	// handle catching the pokemon
+	randNum := rand.Intn(pokemon.BaseExperience)
+	if randNum < threshold {
+		fmt.Println("You caught " + pokemon.Name + "!")
+		userPokedex[pokemon.Name] = pokemon
+	} else {
+		fmt.Println("Oh no! " + pokemon.Name + " got away!")
+	}
+
 	return nil
 }

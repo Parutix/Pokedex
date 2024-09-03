@@ -5,11 +5,16 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/Parutix/Pokedex/internal/pokeapi"
 )
 
 var commandsWithArgs = map[string]bool{
 	"explore": true,
+	"catch": true,
 }
+
+var userPokedex = map[string]pokeapi.Pokemon{}
 
 func splitCommand(input string) (string, string) {
 	parts := strings.SplitN(input, " ", 2)
