@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 )
 
 var commands map[string]command
@@ -45,6 +46,16 @@ func initCommands() {
 			name:				"catch",
 			description: "Catch a Pokemon",
 			function:		catchPokemon,
+		},
+		"inspect": {
+			name:				"inspect",
+			description: "Inspect a Pokemon from your Pokedex",
+			function:		inspectPokemon,
+		},
+		"pokedex": {
+			name:				"pokedex",
+			description: "Display all Pokemon in your Pokedex",
+			function:		displayPokedex,
 		},
 	}
 }
@@ -127,6 +138,73 @@ func catchPokemon(cfg *config, args ...string) error {
 		userPokedex[pokemon.Name] = pokemon
 	} else {
 		fmt.Println("Oh no! " + pokemon.Name + " got away!")
+	}
+
+	return nil
+}
+
+func inspectPokemon(cfg *config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("No Pokémon provided. Usage: inspectPokemon <pokemon-name>")
+	}
+
+	pokemonName := strings.ToLower(args[0])
+	pokemon, exists := userPokedex[pokemonName]
+	if !exists {
+		fmt.Println("Pokémon not found in Pokedex")
+		return nil
+	}
+
+	fmt.Printf("Name: %s\n", strings.Title(pokemon.Name))
+	fmt.Printf("ID: %d\n", pokemon.ID)
+	fmt.Printf("Base Experience: %d\n", pokemon.BaseExperience)
+	fmt.Printf("Height: %d\n", pokemon.Height)
+	fmt.Printf("Weight: %d\n", pokemon.Weight)
+	fmt.Println()
+
+	fmt.Println("Abilities:")
+	for _, ability := range pokemon.Abilities {
+		hidden := ""
+		if ability.IsHidden {
+			hidden = " (Hidden)"
+		}
+		fmt.Printf("- %s%s (Slot %d)\n", strings.Title(ability.Ability.Name), hidden, ability.Slot)
+	}
+	fmt.Println()
+
+	fmt.Println("Types:")
+	var types []string
+	for _, t := range pokemon.Types {
+		types = append(types, strings.Title(t.Type.Name))
+	}
+	fmt.Printf("- %s\n", strings.Join(types, ", "))
+	fmt.Println()
+
+	fmt.Println("Stats:")
+	for _, stat := range pokemon.Stats {
+		fmt.Printf("- %s: %d (Effort: %d)\n", strings.Title(stat.Stat.Name), stat.BaseStat, stat.Effort)
+	}
+	fmt.Println()
+
+	if len(pokemon.Forms) > 1 {
+		fmt.Println("Forms:")
+		for _, form := range pokemon.Forms {
+			fmt.Printf("- %s\n", strings.Title(form.Name))
+		}
+		fmt.Println()
+	}
+
+	return nil
+}
+
+func displayPokedex(cfg *config, args ...string) error {
+	if len(userPokedex) == 0 {
+		fmt.Println("Pokedex is empty")
+		return nil
+	}
+
+	for name := range userPokedex {
+		fmt.Println(strings.Title(name))
 	}
 
 	return nil

@@ -12,6 +12,7 @@ import (
 var commandsWithArgs = map[string]bool{
 	"explore": true,
 	"catch": true,
+	"inspect": true,
 }
 
 var userPokedex = map[string]pokeapi.Pokemon{}
